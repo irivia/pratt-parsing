@@ -1,5 +1,6 @@
 CC=gcc
 SRC=$(wildcard ./src/*.c)
+HEADERS=$(wildcard ./src/*.h)
 CFLAGS=-O3 -Werror -Wall -Wextra
 DFLAGS=-O0 -g -Wall -Wextra
 LFLAGS=-lm
@@ -15,13 +16,13 @@ endif
 
 all: $(BUILD) $(EXE) $(TEST) $(DEBUG)
 
-$(EXE): $(SRC)
+$(EXE): $(SRC) $(HEADERS)
 	$(CC) $(DEFS) $(CFLAGS) -o $(EXE) $(SRC) $(LFLAGS)
 
-$(TEST): $(SRC)
+$(TEST): $(SRC) $(HEADERS)
 	$(CC) -DTEST $(DEFS) $(CFLAGS) -o $(TEST) $(SRC) $(LFLAGS)
 
-$(DEBUG): $(SRC)
+$(DEBUG): $(SRC) $(HEADERS)
 	$(CC) $(DEFS) $(DFLAGS) -o $(DEBUG) $(SRC) $(LFLAGS)
 
 run: $(EXE)
