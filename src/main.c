@@ -10,12 +10,12 @@
 #include "value.h"
 #include "test.h"
 
-void print_value(Value value)
+void print_value(Value value, bool prompt)
 {
-    printf(">> ");
+    if (prompt) printf(">> ");
     switch (value.type) {
         case VALUE_NUM:
-            printf("%0.25Lf\n", AS_NUM(value));
+            printf("%0.7Lf\n", AS_NUM(value));
             break;
         case VALUE_STR:
             printf("%.*s\n", (int)AS_STR(value).len, AS_STR(value).data);
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
             printf(">> ");
             fgets(buffer, sizeof(char) * buffer_len, stdin);
             Value result = get_result(&parser, &list, buffer);
-            print_value(result);
+            print_value(result, true);
         }
     }
     else {
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
         }
         buffer[i] = '\0';
         Value result = get_result(&parser, &list, buffer);
-        print_value(result);
+        print_value(result, false);
     }
 #endif
     parser_destroy(&parser);
