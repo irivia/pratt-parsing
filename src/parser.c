@@ -115,6 +115,11 @@ Token consume(Parser *parser)
     return parser->tokens->items[parser->current++];
 }
 
+void vomit(Parser *parser)
+{
+    parser->current--;
+}
+
 Token expect(Parser *parser, TokenType expected)
 {
     Token token = peek(parser);
@@ -594,6 +599,11 @@ Value identifier(Parser *parser)
         }
     }
 
+    String ident_str = (String){.data = (char*)ident.start, .len = ident.len };
+    if(map_has(&parser->map, ident_str)) {
+        vomit(parser);
+        return declare(parser);
+    }
     log_info(&parser->logging, "Error: Unkown identifier '%.*s'", ident.len, ident.start);
     parser->error = true;
 
