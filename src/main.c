@@ -8,7 +8,6 @@
 #include "log.h"
 #include "parser.h"
 #include "value.h"
-#include "test.h"
 
 void print_value(Value value, bool prompt)
 {
@@ -82,6 +81,7 @@ int main(int argc, char **argv)
     TokenList list = {0};
     Parser parser = parser_create();
 #ifdef TEST
+    #include "test.h"
     LoggingInfo logger = log_create("tests.txt", NULL, 1);
     srand(time(0));
     for (int i = 0; i < 1000; i++) {
