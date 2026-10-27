@@ -233,31 +233,31 @@ Value do_operation(Parser *parser, Value left, Value right, Token oper)
 
 Value expression(Parser *parser, precedence rbp, TokenType expected_first_token)
 {
-    if (parser->error) return VAL_NUM(0.0);
+    if (parser->error) return VAL_NULL;
     Token token = consume(parser);
     if (expected_first_token != TOKEN_NONE && token.type != expected_first_token) {
         parser->error = true;
         log_info(&parser->logging, "The first token wasn't as expected.");
-        return VAL_BOOL(false);
+        return VAL_NULL;
     }
 
     ParseRule *left_rule = get_rule(token);
     if (!left_rule->prefix) {
         parser->error = true;
         log_info(&parser->logging, "The token '%.*s' must be exceeded by a value.", token.len, token.start);
-        return VAL_BOOL(false);
+        return VAL_NULL;
     }
 
     Value left = left_rule->prefix(parser);
 
     while ((int)rbp < get_rule(peek(parser))->lbp) {
-        if (parser->error) return VAL_NUM(0.0);
+        if (parser->error) return VAL_NULL;
         token = consume(parser);
         ParseRule *right_rule = get_rule(token);
         if (!right_rule->infix) {
             parser->error = true;
             log_info(&parser->logging, "The token '%.*s' must be preceeded by a value.", token.len, token.start);
-            return VAL_BOOL(false);
+            return VAL_NULL;
         }
         Value right = right_rule->infix(parser); 
         left = do_operation(parser, left, right, token);
@@ -272,7 +272,7 @@ Value parse_expr(Parser *parser)
         parser->tokens->items[0].type == TOKEN_END ||
         parser->tokens->items[0].type == TOKEN_ERROR) {
         parser->error = true;
-        return VAL_NUM(0.0);
+        return VAL_NULL;
     }
     Value result = expression(parser, PREC_NONE, TOKEN_NONE);
     parser->ans = result;
@@ -422,7 +422,7 @@ Value math_func(Parser *parser, MathFunc func)
         case EULER:
             return VAL_NUM(2.71828182845904523536028747135266249775724709369995f);
         default:
-            return VAL_NUM(0.0f); // unreachable
+            return VAL_NULL; // unreachable
     }
 }
 
