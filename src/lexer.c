@@ -68,10 +68,8 @@ static Token match_identifier(Lexer *lexer, const char *text, int len, TokenType
         consume(lexer);
     }
 
-    if (lexer->current - start == len) {
-        if (memcmp(&lexer->text[start], text, len) == 0) {
-            token.type = type;
-        }
+    if (lexer->current - start == len && memcmp(&lexer->text[start], text, len) == 0) {
+        token.type = type;
     }
     else {
         token.type = TOKEN_IDENTIFIER;
