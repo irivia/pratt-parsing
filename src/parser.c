@@ -601,6 +601,12 @@ Value identifier(Parser *parser)
         fclose(file);
         return var;
     }
+    else if (expected_str(ident.start, "type", ident.len)) {
+        Value value = expression(parser, PREC_NONE, TOKEN_NONE);
+        char *type_name = value_type_to_str(value.type);
+        String type_str = (String) {.data = type_name, .len = strlen(type_name)};
+        return VAL_STR(type_str);
+    }
 
     for (size_t i = 0; i < array_len(funcs); i++) {
         if (expected_str(ident.start, funcs[i], ident.len)) {
