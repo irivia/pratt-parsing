@@ -22,6 +22,7 @@ Value declare(Parser *parser);
 Value get_var(Parser *parser);
 Value string(Parser *parser);
 Value boolean(Parser *parser);
+Value modify(Parser *parser);
 
 ParseRule rules[TOKEN_COUNT] = {
     {NULL, NULL, PREC_NONE},            // TOKEN_NONE 
@@ -602,7 +603,7 @@ Value identifier(Parser *parser)
     String ident_str = (String){.data = (char*)ident.start, .len = ident.len };
     if(map_has(&parser->map, ident_str)) {
         vomit(parser);
-        return declare(parser);
+        return modify(parser);
     }
     log_info(&parser->logging, "Error: Unkown identifier '%.*s'", ident.len, ident.start);
     parser->error = true;
@@ -616,23 +617,47 @@ Value declare(Parser *parser)
     expect(parser, TOKEN_EQUAL); 
     Value result = expression(parser, PREC_NONE, TOKEN_NONE);
 
+    String str = {.data = (char*)ident.start, .len = ident.len};
+
+    if (map_has(&parser->map, str)) {
+        parser->error = true;
+        log_info(&parser->logging, "Error: can't re-declare an existing variable: '%.*s'", ident.len, ident.start);
+        return (Value){0};
+    }
+
     if (result.type == VALUE_STR) {
         result = VAL_STR(string_create(AS_STR(result).data, AS_STR(result).len));
     }
 
+    String key = string_create(ident.start, ident.len);
+    map_set(&parser->map, key, result);
+
+    return result;
+}
+
+Value modify(Parser *parser)
+{
+    Token ident = consume(parser); 
+    expect(parser, TOKEN_EQUAL); 
+    Value result = expression(parser, PREC_NONE, TOKEN_NONE);
+
     String str = {.data = (char*)ident.start, .len = ident.len};
 
     if (!map_has(&parser->map, str)) {
-        String key = string_create(ident.start, ident.len);
-        map_set(&parser->map, key, result);
+        parser->error = true;
+        log_info(&parser->logging, "Error: can't modify a non-existing variable: '%.*s'", ident.len, ident.start);
+        return (Value){0};
     }
-    else {
-        Value val = map_get(&parser->map, str);
-        if (val.type == VALUE_STR) {
-            string_destroy(&AS_STR(val));
-        }
-        map_set(&parser->map, str, result);
+
+    if (result.type == VALUE_STR) {
+        result = VAL_STR(string_create(AS_STR(result).data, AS_STR(result).len));
     }
+
+    Value val = map_get(&parser->map, str);
+    if (val.type == VALUE_STR) {
+        string_destroy(&AS_STR(val));
+    }
+    map_set(&parser->map, str, result);
 
     return result;
 }
