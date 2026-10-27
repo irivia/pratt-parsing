@@ -15,15 +15,28 @@ uint32_t hash(String key)
     return hash;
 }
 
-Map map_new()
+Map map_new(size_t size)
 {
     Map map;
-    map.capacity = DEFAULT_MAP_CAP;
+    map.capacity = size == 0 ? DEFAULT_MAP_CAP : size;
     map.count = 0;
     map.items = (Map_Node*)calloc(map.capacity, sizeof(Map_Node));
     map.hash = hash;
 
     return map;
+}
+
+void map_grow(Map *map)
+{
+    Map new_map = map_new(map->capacity * 2);
+    for (size_t i = 0; i < map->capacity; i++) {
+        Map_Node cur = map->items[i];
+        if (cur.valid) {
+            map_set(&new_map, cur.key, cur.value);
+        }
+    }
+    map_delete(map);
+    *map = new_map;
 }
 
 void map_delete(Map *map)
@@ -32,8 +45,6 @@ void map_delete(Map *map)
     map->items = NULL;
     map->capacity = 0;
     map->count = 0;
-
-    return;
 }
 
 uint32_t map_get_hash(Map *map, MAP_KEY key)
@@ -58,6 +69,10 @@ uint32_t map_get_i(Map *map, MAP_KEY key)
 
 bool map_set(Map *map, MAP_KEY key, MAP_VALUE value)
 {
+    if (map->count >= map->capacity) {
+        map_grow(map);
+    }
+
     uint32_t hash_value = map_get_hash(map, key);
     
     for (uint32_t i = 0; i < map->capacity; i++) {

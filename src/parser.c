@@ -75,7 +75,7 @@ Parser parser_create()
     parser.current = 0;
     parser.error = false;
     parser.ans = VAL_NUM(0);
-    parser.map = map_new();
+    parser.map = map_new(64);
     parser.arena = arena_init(1024);
     parser.logging = log_create("parser_log.txt", NULL, 0);
 
