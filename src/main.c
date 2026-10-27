@@ -13,6 +13,9 @@ void print_value(Value value, bool prompt)
 {
     if (prompt) printf(">> ");
     switch (value.type) {
+        case VALUE_NULL:
+            printf("null\n");
+            break;
         case VALUE_NUM:
             printf("%0.7Lf\n", AS_NUM(value));
             break;
@@ -28,6 +31,9 @@ void print_value(Value value, bool prompt)
 void log_value(LoggingInfo *li, Value value)
 {
     switch (value.type) {
+        case VALUE_NULL:
+            log_info(li, ">> null\n");
+            break;
         case VALUE_NUM:
             log_info(li, ">> %0.25Lf", AS_NUM(value));
             break;

@@ -47,6 +47,9 @@ void value_to_str(char *buffer, Value *value)
         case VALUE_BOOL:
             sprintf(buffer, "%s", AS_BOOL(*value) ? "true" : "false");
             break;
+        case VALUE_NULL:
+            sprintf(buffer, "null");
+            break;
     }
 }
 
@@ -56,6 +59,7 @@ char* value_type_to_str(ValueType type)
         case VALUE_NUM: return "Number";
         case VALUE_STR: return "String";
         case VALUE_BOOL: return "Bool";
+        case VALUE_NULL: return "Null";
     }
 
     return NULL;

@@ -5,6 +5,7 @@
 #include "arena.h"
 
 typedef enum {
+    VALUE_NULL = 0,
     VALUE_NUM,
     VALUE_STR,
     VALUE_BOOL,
@@ -28,9 +29,12 @@ typedef struct {
 #define AS_STR(val)  ((val).as.str)
 #define AS_BOOL(val) ((val).as.bol)
 
+#define VAL_NULL      ((Value){.type = VALUE_NULL, .as = {.bol = false}})
 #define VAL_NUM(val)  ((Value){.type = VALUE_NUM,  .as = {.num = (val)}})
 #define VAL_STR(val)  ((Value){.type = VALUE_STR,  .as = {.str = (val)}})
 #define VAL_BOOL(val) ((Value){.type = VALUE_BOOL, .as = {.bol = (val)}})
+
+#define IS_NULL(val) ((val).type == VALUE_NULL)
 
 String string_create(const char *text, size_t len);
 void string_destroy(String *string);

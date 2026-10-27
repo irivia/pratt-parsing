@@ -161,9 +161,10 @@ Value do_operation(Parser *parser, Value left, Value right, Token oper)
     switch (oper.type) {
         case TOKEN_PLUS: 
             switch (left.type) {
-                case VALUE_BOOL: invalid_op(); break;
                 case VALUE_NUM: result = VAL_NUM(AS_NUM(left) + AS_NUM(right)); break;
                 case VALUE_STR: result = VAL_STR(string_add(&parser->arena, &AS_STR(left), &AS_STR(right))); break;
+                case VALUE_BOOL:
+                case VALUE_NULL: invalid_op(); break;
             }
             break;
         case TOKEN_MINUS: 
@@ -187,6 +188,7 @@ Value do_operation(Parser *parser, Value left, Value right, Token oper)
                 case VALUE_NUM:  result = VAL_BOOL(AS_NUM(left) == AS_NUM(right)); break;
                 case VALUE_STR:  result = VAL_BOOL(string_compare(&AS_STR(left), &AS_STR(right))); break;
                 case VALUE_BOOL: result = VAL_BOOL(AS_BOOL(left) == AS_BOOL(right)); break;
+                case VALUE_NULL: invalid_op(); break;
             }
             break;
         case TOKEN_NOTEQ:
@@ -194,6 +196,7 @@ Value do_operation(Parser *parser, Value left, Value right, Token oper)
                 case VALUE_NUM:  result = VAL_BOOL(AS_NUM(left) != AS_NUM(right)); break;
                 case VALUE_STR:  result = VAL_BOOL(!string_compare(&AS_STR(left), &AS_STR(right))); break;
                 case VALUE_BOOL: result = VAL_BOOL(AS_BOOL(left) != AS_BOOL(right)); break;
+                case VALUE_NULL: invalid_op(); break;
             }
             break;
         case TOKEN_LESS: 
