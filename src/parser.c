@@ -532,6 +532,11 @@ Value identifier(Parser *parser)
 
     Token ident = prev(parser);
 
+    if (peek(parser).type == TOKEN_EQUAL) {
+        vomit(parser);
+        return modify(parser);
+    }
+
     if (expected_str(ident.start, "export", ident.len)) {
         expect(parser, TOKEN_LEFT_PAREN);
 
@@ -603,11 +608,6 @@ Value identifier(Parser *parser)
         }
     }
 
-    String ident_str = (String){.data = (char*)ident.start, .len = ident.len };
-    if(map_has(&parser->map, ident_str)) {
-        vomit(parser);
-        return modify(parser);
-    }
     log_info(&parser->logging, "Error: Unkown identifier '%.*s'", ident.len, ident.start);
     parser->error = true;
 
