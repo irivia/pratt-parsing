@@ -36,13 +36,20 @@ Math functions:
 > atan2(90, 180)
 ```
 
-Declare variables, this works both for declaring new variables and reassigning existing variables:
+Declare new variables:
 
 ```
 > let three = 3
 > let hi = 'hi'
 > let hello = "hello"
-> let hello = 77
+```
+
+Modify existing variables:
+
+```
+> three = 6
+> hi = "hello"
+> hello = 'hi'
 ```
 
 Using variables:
