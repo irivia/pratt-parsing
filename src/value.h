@@ -29,7 +29,7 @@ typedef struct {
 #define AS_STR(val)  ((val).as.str)
 #define AS_BOOL(val) ((val).as.bol)
 
-#define VAL_NULL      ((Value){.type = VALUE_NULL, .as = {.bol = false}})
+#define VAL_NULL      ((Value){.type = VALUE_NULL, .as = {0}})
 #define VAL_NUM(val)  ((Value){.type = VALUE_NUM,  .as = {.num = (val)}})
 #define VAL_STR(val)  ((Value){.type = VALUE_STR,  .as = {.str = (val)}})
 #define VAL_BOOL(val) ((Value){.type = VALUE_BOOL, .as = {.bol = (val)}})
