@@ -138,18 +138,22 @@ Token expect(Parser *parser, TokenType expected)
 Value do_operation(Parser *parser, Value left, Value right, Token oper)
 {
     if (left.type != right.type) {
-        char buffer1[100];
-        value_to_str(buffer1, &left);
-        char buffer2[100];
-        value_to_str(buffer2, &right);
+        char *buffer1 = NULL;
+        value_to_str(&buffer1, &left);
+        char *buffer2 = NULL;
+        value_to_str(&buffer2, &right);
 
         log_info(&parser->logging, "Error: Value: %s of type: %s has a different type than Value: %s of type: %s",
                 buffer1, value_type_to_str(left.type), buffer2, value_type_to_str(right.type));
 
+        free(buffer1);
+        free(buffer2);
+
         parser->error = true;
+        return VAL_NULL;
     }
 
-    Value result;
+    Value result = VAL_NULL;
 
     #define invalid_op()\
         do { \
@@ -159,7 +163,7 @@ Value do_operation(Parser *parser, Value left, Value right, Token oper)
         } while (0)
 
     switch (oper.type) {
-        case TOKEN_PLUS: 
+        case TOKEN_PLUS:
             switch (left.type) {
                 case VALUE_NUM: result = VAL_NUM(AS_NUM(left) + AS_NUM(right)); break;
                 case VALUE_STR: result = VAL_STR(string_add(&parser->arena, &AS_STR(left), &AS_STR(right))); break;
@@ -683,9 +687,10 @@ Value get_var(Parser *parser)
             if (parser->map.items[i].valid) {
                 String key = parser->map.items[i].key;
                 Value value = parser->map.items[i].value;
-                static char buffer[100];
-                value_to_str(buffer, &value);
-                printf("Key: %.*s, Value: %s\n", (int)key.len, key.data, buffer);
+                char *buffer = NULL;
+                value_to_str(&buffer, &value);
+                log_info(&parser->logging, "Key: %.*s, Value: %s\n", (int)key.len, key.data, buffer);
+                free(buffer);
             }
         }
     }

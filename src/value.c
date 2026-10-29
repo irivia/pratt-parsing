@@ -35,20 +35,21 @@ String string_create_arena(Arena *arena, const char *text, size_t len)
     return str;
 }
 
-void value_to_str(char *buffer, Value *value)
+void value_to_str(char **buffer, Value *value)
 {
+    *buffer = NULL;
     switch (value->type) {
         case VALUE_NUM:
-            sprintf(buffer, "%0.15Lf", AS_NUM(*value));
+            asprintf(buffer, "%0.15Lf", AS_NUM(*value));
             break;
         case VALUE_STR:
-            sprintf(buffer, "%.*s", (int)AS_STR(*value).len, AS_STR(*value).data);
+            asprintf(buffer, "%.*s", (int)AS_STR(*value).len, AS_STR(*value).data);
             break;
         case VALUE_BOOL:
-            sprintf(buffer, "%s", AS_BOOL(*value) ? "true" : "false");
+            asprintf(buffer, "%s", AS_BOOL(*value) ? "true" : "false");
             break;
         case VALUE_NULL:
-            sprintf(buffer, "null");
+            asprintf(buffer, "null");
             break;
     }
 }
@@ -85,4 +86,3 @@ bool string_compare(String* one, String *two)
 
     return false;
 }
-
