@@ -35,12 +35,29 @@ String string_create_arena(Arena *arena, const char *text, size_t len)
     return str;
 }
 
+char* num_to_str(Value value)
+{
+    char *buffer = NULL;
+
+    asprintf(&buffer, "%0.15Lf", AS_NUM(value));
+    for (int i = strlen(buffer) - 1; i >= 0; i--) {
+        if (buffer[i] != '0') break;
+        buffer[i] = '\0';
+    }
+    int len = strlen(buffer);
+    if (len > 0 && buffer[len - 1] == '.') {
+        buffer[len - 1] = '\0';
+    }
+
+    return buffer;
+}
+
 void value_to_str(char **buffer, Value *value)
 {
     *buffer = NULL;
     switch (value->type) {
         case VALUE_NUM:
-            asprintf(buffer, "%0.15Lf", AS_NUM(*value));
+            *buffer = num_to_str(*value);
             break;
         case VALUE_STR:
             asprintf(buffer, "%.*s", (int)AS_STR(*value).len, AS_STR(*value).data);

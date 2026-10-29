@@ -11,13 +11,15 @@
 
 void print_value(Value value, bool prompt)
 {
+    char *num = NULL;
     if (prompt) printf(">> ");
     switch (value.type) {
         case VALUE_NULL:
             printf("null\n");
             break;
         case VALUE_NUM:
-            printf("%0.7Lf\n", AS_NUM(value));
+            num = num_to_str(value);
+            printf("%s\n", num);
             break;
         case VALUE_STR:
             printf("%.*s\n", (int)AS_STR(value).len, AS_STR(value).data);
@@ -26,6 +28,7 @@ void print_value(Value value, bool prompt)
             printf("%s\n", AS_BOOL(value) ? "true" : "false");
             break;
     }
+    free(num);
 }
 
 void log_value(LoggingInfo *li, Value value)

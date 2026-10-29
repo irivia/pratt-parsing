@@ -43,3 +43,4 @@ bool string_compare(String* one, String *two);
 String string_add(Arena *arena, String *one, String *two);
 void value_to_str(char **buffer, Value *value);
 char* value_type_to_str(ValueType type);
+char* num_to_str(Value value);
