@@ -137,23 +137,12 @@ Token expect(Parser *parser, TokenType expected)
 
 Value do_operation(Parser *parser, Value left, Value right, Token oper)
 {
-    if (left.type != right.type) {
-        char *buffer1 = NULL;
-        value_to_str(&buffer1, &left);
-        char *buffer2 = NULL;
-        value_to_str(&buffer2, &right);
-
-        log_info(&parser->logging, "Error: Value: %s of type: %s has a different type than Value: %s of type: %s",
-                buffer1, value_type_to_str(left.type), buffer2, value_type_to_str(right.type));
-
-        free(buffer1);
-        free(buffer2);
-
-        parser->error = true;
-        return VAL_NULL;
-    }
-
     Value result = VAL_NULL;
+
+    if (left.type != right.type) {
+        left = cast_value_to_str(left);
+        right = cast_value_to_str(right);
+    }
 
     #define invalid_op()\
         do { \
