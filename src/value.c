@@ -103,3 +103,16 @@ bool string_compare(String* one, String *two)
 
     return false;
 }
+
+Value cast_value_to_str(Value val)
+{
+    if (val.type == VALUE_STR) return val;
+
+    Value new_val = {0};
+
+    value_to_str(&AS_STR(new_val).data, &val);
+    AS_STR(new_val).len = strlen(AS_STR(new_val).data);
+    new_val.type = VALUE_STR;
+
+    return new_val;
+}
