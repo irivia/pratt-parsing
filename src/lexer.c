@@ -307,13 +307,14 @@ bool tokenize(const char *text, TokenList *output)
 void print_tokenlist(TokenList *list)
 {
     static const char* token_names[TOKEN_COUNT] = {
-        "NUM", 
+        "NONE",
+        "NUM",
         "STRING",
         "PLUS",
         "MINUS",
         "STAR",
         "SLASH",
-        "CARET", 
+        "CARET",
         "LEFT_PAREN",
         "RIGHT_PAREN",
         "COMMA",
