@@ -33,8 +33,10 @@
     X(TOKEN_GREATEREQ), \
     X(TOKEN_TRUE), \
     X(TOKEN_FALSE), \
-    X(TOKEN_QMARK), \
+    X(TOKEN_LEFT_BRAC), \
+    X(TOKEN_RIGHT_BRAC), \
     X(TOKEN_COLON), \
+    X(TOKEN_SEMI_COLON), \
     X(TOKEN_END), \
     X(TOKEN_ERROR), \
     X(TOKEN_COUNT),

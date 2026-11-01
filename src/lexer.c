@@ -207,20 +207,32 @@ static Token scan_token(Lexer *lexer)
                 token.len = 1;
                 consume(lexer);
                 break;
+            case '[':
+                token.type = TOKEN_LEFT_BRAC;
+                token.start = &lexer->text[lexer->current];
+                token.len = 1;
+                consume(lexer);
+                break;
+            case ']':
+                token.type = TOKEN_RIGHT_BRAC;
+                token.start = &lexer->text[lexer->current];
+                token.len = 1;
+                consume(lexer);
+                break;
             case ',':
                 token.type = TOKEN_COMMA;
                 token.start = &lexer->text[lexer->current];
                 token.len = 1;
                 consume(lexer);
                 break;
-            case '?':
-                token.type = TOKEN_QMARK;
+            case ':':
+                token.type = TOKEN_COLON;
                 token.start = &lexer->text[lexer->current];
                 token.len = 1;
                 consume(lexer);
                 break;
-            case ':':
-                token.type = TOKEN_COLON;
+            case ';':
+                token.type = TOKEN_SEMI_COLON;
                 token.start = &lexer->text[lexer->current];
                 token.len = 1;
                 consume(lexer);

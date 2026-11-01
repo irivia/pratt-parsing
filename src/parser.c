@@ -22,6 +22,7 @@ Value declare(Parser *parser);
 Value get_var(Parser *parser);
 Value string(Parser *parser);
 Value boolean(Parser *parser);
+Value conditional(Parser *parser, Value cond);
 Value modify(Parser *parser);
 
 ParseRule rules[TOKEN_COUNT] = {
@@ -53,6 +54,10 @@ ParseRule rules[TOKEN_COUNT] = {
     {NULL, binary, PREC_COMP},          // TOKEN_GREATEREQ
     {boolean, NULL, PREC_NONE},         // TOKEN_TRUE
     {boolean, NULL, PREC_NONE},         // TOKEN_FALSE
+    {grouping, NULL, PREC_NONE},        // TOKEN_LEFT_BRAC
+    {NULL, NULL, PREC_NONE},            // TOKEN_RIGHT_BRAC
+    {NULL, NULL, PREC_NONE},            // TOKEN_COLON
+    {NULL, NULL, PREC_NONE},            // TOKEN_SEMI_COLON
     {NULL, NULL, PREC_NONE},            // TOKEN_END
     {NULL, NULL, PREC_NONE},            // TOKEN_ERROR
     // TOKEN_COUNT
@@ -280,8 +285,21 @@ Value ans(Parser *parser)
 
 Value grouping(Parser *parser)
 {
-    Value result = expression(parser, PREC_NONE, TOKEN_NONE);
-    expect(parser, TOKEN_RIGHT_PAREN);
+    Token tok = prev(parser);
+    Value result = VAL_NULL;
+
+    switch (tok.type) {
+        case TOKEN_LEFT_PAREN:
+            result = expression(parser, PREC_NONE, TOKEN_NONE);
+            expect(parser, TOKEN_RIGHT_PAREN);
+            break;
+        case TOKEN_LEFT_BRAC:
+            result = expression(parser, PREC_NONE, TOKEN_NONE);
+            expect(parser, TOKEN_RIGHT_BRAC);
+            return conditional(parser, result);
+        default:
+            return result;
+    }
 
     return result;
 }
@@ -712,4 +730,27 @@ Value boolean(Parser *parser)
     Token token = prev(parser);
 
     return token.type == TOKEN_TRUE ? VAL_BOOL(true) : VAL_BOOL(false);
+}
+
+Value conditional(Parser *parser, Value cond)
+{
+    Value result_if_true = expression(parser, PREC_NONE, TOKEN_NONE);
+    Value result_if_false = VAL_NULL;
+    Value result = VAL_NULL;
+
+    if (peek(parser).type == TOKEN_COLON) {
+        consume(parser);
+        result_if_false = expression(parser, PREC_NONE, TOKEN_NONE);
+    }
+
+    if (AS_BOOL(cond)) {
+        result = result_if_true;
+    }
+    else {
+        result = result_if_false;
+    }
+
+    expect(parser, TOKEN_SEMI_COLON);
+
+    return result;
 }
