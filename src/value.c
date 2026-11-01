@@ -116,3 +116,17 @@ Value cast_value_to_str(Value val)
 
     return new_val;
 }
+
+Value cast_value_to_bool(Value val)
+{
+    switch (val.type) {
+        case VALUE_NULL:
+            return VAL_BOOL(false);
+        case VALUE_NUM:
+            return VAL_BOOL((bool)AS_NUM(val));
+        case VALUE_STR:
+            return VAL_BOOL(AS_STR(val).len > 0);
+        case VALUE_BOOL:
+            return val;
+    }
+}

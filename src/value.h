@@ -45,3 +45,4 @@ void value_to_str(char **buffer, Value *value);
 char* value_type_to_str(ValueType type);
 char* num_to_str(Value value);
 Value cast_value_to_str(Value val);
+Value cast_value_to_bool(Value val);
