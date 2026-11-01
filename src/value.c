@@ -129,4 +129,6 @@ Value cast_value_to_bool(Value val)
         case VALUE_BOOL:
             return val;
     }
+
+    return val;
 }
