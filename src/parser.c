@@ -79,6 +79,7 @@ Parser parser_create()
     Parser parser;
     parser.current = 0;
     parser.error = false;
+    parser.skip = false;
     parser.ans = VAL_NUM(0);
     parser.map = map_new(64);
     parser.arena = arena_init(1024);
@@ -90,6 +91,7 @@ Parser parser_create()
 void parser_reset(Parser *parser, TokenList *list)
 {
     parser->error = false;
+    parser->skip = false;
     parser->current = 0;
     parser->tokens = list;
 }
@@ -637,6 +639,10 @@ Value declare(Parser *parser)
     expect(parser, TOKEN_EQUAL); 
     Value result = expression(parser, PREC_NONE, TOKEN_NONE);
 
+    if (parser->skip) {
+        return result;
+    }
+
     String str = {.data = (char*)ident.start, .len = ident.len};
 
     if (map_has(&parser->map, str)) {
@@ -660,6 +666,10 @@ Value modify(Parser *parser)
     Token ident = consume(parser); 
     expect(parser, TOKEN_EQUAL); 
     Value result = expression(parser, PREC_NONE, TOKEN_NONE);
+
+    if (parser->skip) {
+        return result;
+    }
 
     String str = {.data = (char*)ident.start, .len = ident.len};
 
@@ -734,20 +744,25 @@ Value boolean(Parser *parser)
 
 Value conditional(Parser *parser, Value cond)
 {
-    Value result_if_true = expression(parser, PREC_NONE, TOKEN_NONE);
-    Value result_if_false = VAL_NULL;
     Value result = VAL_NULL;
 
-    if (peek(parser).type == TOKEN_COLON) {
-        consume(parser);
-        result_if_false = expression(parser, PREC_NONE, TOKEN_NONE);
-    }
-
     if (AS_BOOL(cond)) {
-        result = result_if_true;
+        result = expression(parser, PREC_NONE, TOKEN_NONE);
+        if (peek(parser).type == TOKEN_COLON) {
+            consume(parser);
+            parser->skip = true;
+            expression(parser, PREC_NONE, TOKEN_NONE);
+            parser->skip = false;
+        }
     }
     else {
-        result = result_if_false;
+        parser->skip = true;
+        expression(parser, PREC_NONE, TOKEN_NONE);
+        parser->skip = false;
+        if (peek(parser).type == TOKEN_COLON) {
+            consume(parser);
+            result = expression(parser, PREC_NONE, TOKEN_NONE);
+        }
     }
 
     expect(parser, TOKEN_SEMI_COLON);

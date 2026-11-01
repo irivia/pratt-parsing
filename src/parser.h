@@ -26,6 +26,7 @@ typedef struct {
     Map map;
     Arena arena;
     bool error;
+    bool skip;
     LoggingInfo logging;
 } Parser;
 
