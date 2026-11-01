@@ -129,18 +129,19 @@ void vomit(Parser *parser)
     parser->current--;
 }
 
-Token expect(Parser *parser, TokenType expected)
+bool expect(Parser *parser, TokenType expected, Token *result)
 {
     Token token = peek(parser);
+    if (result) *result = token;
 
     if (token.type == expected) {
-        return consume(parser);
+        consume(parser);
+        return true;
     }
-    else {
-        log_info(&parser->logging, "Error: Invalid Token '%.*s'", token.len, token.start);
-        parser->error = true;
-        return (Token){.type = TOKEN_ERROR};
-    }
+
+    log_info(&parser->logging, "Error: Invalid Token '%.*s'", token.len, token.start);
+    parser->error = true;
+    return false;
 }
 
 Value do_operation(Parser *parser, Value left, Value right, Token oper)
@@ -294,11 +295,11 @@ Value grouping(Parser *parser)
     switch (tok.type) {
         case TOKEN_LEFT_PAREN:
             result = expression(parser, PREC_NONE, TOKEN_NONE);
-            expect(parser, TOKEN_RIGHT_PAREN);
+            expect(parser, TOKEN_RIGHT_PAREN, NULL);
             break;
         case TOKEN_LEFT_BRAC:
             result = expression(parser, PREC_NONE, TOKEN_NONE);
-            expect(parser, TOKEN_RIGHT_BRAC);
+            expect(parser, TOKEN_RIGHT_BRAC, NULL);
             return conditional(parser, result);
         default:
             return result;
@@ -366,70 +367,70 @@ Value math_func(Parser *parser, MathFunc func)
 
     switch (func) {
         case SIN:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(sinl(AS_NUM(grouping(parser)))); 
         case COS:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(cosl(AS_NUM(grouping(parser))));
         case TAN:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(tanl(AS_NUM(grouping(parser))));
         case ASIN:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(asinl(AS_NUM(grouping(parser))));
         case ACOS:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(acosl(AS_NUM(grouping(parser))));
         case ATAN:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(atanl(AS_NUM(grouping(parser))));
         case ATAN2:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             r1 = expression(parser, PREC_NONE, TOKEN_NONE);
-            expect(parser, TOKEN_COMMA);
+            if (!expect(parser, TOKEN_COMMA, NULL)) return VAL_NULL;
             r2 = grouping(parser);
             return VAL_NUM(atan2l(AS_NUM(r1), AS_NUM(r2)));
         case SINH:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(sinhl(AS_NUM(grouping(parser))));
         case COSH:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(coshl(AS_NUM(grouping(parser))));
         case TANH:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(tanhl(AS_NUM(grouping(parser))));
         case ASINH:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(asinhl(AS_NUM(grouping(parser))));
         case ACOSH:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(acoshl(AS_NUM(grouping(parser))));
         case ATANH:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(atanhl(AS_NUM(grouping(parser))));
         case EXP:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(expl(AS_NUM(grouping(parser))));
         case LOG:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(logl(AS_NUM(grouping(parser))));
         case LOG10:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(log10l(AS_NUM(grouping(parser))));
         case LOG2:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(log2l(AS_NUM(grouping(parser))));
         case CEIL:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(ceill(AS_NUM(grouping(parser))));
         case FLOOR:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(floorl(AS_NUM(grouping(parser))));
         case ROUND:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(roundl(AS_NUM(grouping(parser))));
         case SQRT:
-            expect(parser, TOKEN_LEFT_PAREN);
+            if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_NULL;
             return VAL_NUM(sqrtl(AS_NUM(grouping(parser))));
         case PI:
             return VAL_NUM(3.14159265358979323846264338327950288419716939937510f);
@@ -556,15 +557,15 @@ Value identifier(Parser *parser)
     }
 
     if (expected_str(ident.start, "export", ident.len)) {
-        expect(parser, TOKEN_LEFT_PAREN);
+        if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_BOOL(false);
 
-        if (expect(parser, TOKEN_DOLLAR).type == TOKEN_ERROR) {
+        if (!expect(parser, TOKEN_DOLLAR, NULL)) {
             log_info(&parser->logging, "Error: First argument should be a variable starting with '$'.");
             return VAL_BOOL(false);
         }
 
-        Token ident = expect(parser, TOKEN_IDENTIFIER);
-        if (ident.type == TOKEN_ERROR) {
+        Token ident;
+        if (!expect(parser, TOKEN_IDENTIFIER, &ident)) {
             log_info(&parser->logging, "Error: Invalid identifier.");
             return VAL_BOOL(false);
         }
@@ -581,7 +582,7 @@ Value identifier(Parser *parser)
             return VAL_BOOL(false);
         }
 
-        expect(parser, TOKEN_COMMA);
+        if (!expect(parser, TOKEN_COMMA, NULL)) return VAL_BOOL(false);
         String var_path = AS_STR(grouping(parser));
         FILE *file = fopen(var_path.data, "wb");
         if (file == NULL) {
@@ -599,9 +600,9 @@ Value identifier(Parser *parser)
         return VAL_BOOL(true);
     }
     else if (expected_str(ident.start, "import", ident.len)) {
-        expect(parser, TOKEN_LEFT_PAREN);
+        if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_BOOL(false);
         String var_name = AS_STR(expression(parser, PREC_NONE, TOKEN_STRING));
-        expect(parser, TOKEN_COMMA);
+        if (!expect(parser, TOKEN_COMMA, NULL)) return VAL_BOOL(false);
         String var_path = AS_STR(grouping(parser));
         FILE *file = fopen(var_path.data, "rb");
         if (file == NULL) {
@@ -641,7 +642,8 @@ Value identifier(Parser *parser)
 Value declare(Parser *parser)
 {
     Token ident = consume(parser); 
-    expect(parser, TOKEN_EQUAL); 
+    if (!expect(parser, TOKEN_EQUAL, NULL)) return VAL_NULL;
+
     Value result = expression(parser, PREC_NONE, TOKEN_NONE);
 
     if (parser->skip) {
@@ -668,8 +670,9 @@ Value declare(Parser *parser)
 
 Value modify(Parser *parser)
 {
-    Token ident = consume(parser); 
-    expect(parser, TOKEN_EQUAL); 
+    Token ident = consume(parser);
+    if (!expect(parser, TOKEN_EQUAL, NULL)) return VAL_NULL;
+
     Value result = expression(parser, PREC_NONE, TOKEN_NONE);
 
     if (parser->skip) {
@@ -699,7 +702,9 @@ Value modify(Parser *parser)
 
 Value get_var(Parser *parser)
 {
-    Token ident = expect(parser, TOKEN_IDENTIFIER);
+    Token ident;
+    if (!expect(parser, TOKEN_IDENTIFIER, &ident))
+        return VAL_NULL;
     String str = {.data = (char*)ident.start, .len = ident.len};
     
     if (!map_has(&parser->map, str)) {
@@ -772,7 +777,7 @@ Value conditional(Parser *parser, Value cond)
         }
     }
 
-    expect(parser, TOKEN_SEMI_COLON);
+    expect(parser, TOKEN_SEMI_COLON, NULL);
 
     return result;
 }
