@@ -306,43 +306,10 @@ bool tokenize(const char *text, TokenList *output)
 
 void print_tokenlist(TokenList *list)
 {
-    static const char* token_names[TOKEN_COUNT] = {
-        "NONE",
-        "NUM",
-        "STRING",
-        "PLUS",
-        "MINUS",
-        "STAR",
-        "SLASH",
-        "CARET",
-        "LEFT_PAREN",
-        "RIGHT_PAREN",
-        "COMMA",
-        "EQUAL",
-        "DOLLAR",
-        "ANS",
-        "IDENTIFIER",
-        "LET",
-        "EXIT",
-        "OR",
-        "AND",
-        "EQEQ",
-        "NOT",
-        "NOTEQ",
-        "LESS",
-        "LESSEQ",
-        "GREATER",
-        "GREATEREQ",
-        "TRUE",
-        "FALSE",
-        "END",
-        "ERROR",
-    };
-
     for (size_t i = 0; i < list->count; i++) {
         Token token = list->items[i];
         printf("{\n");
-        printf("  type: %s\n", token_names[token.type]);
+        printf("  type: %s\n", TOKEN_NAMES[token.type]);
         printf("  text: %.*s\n", token.len, token.start);
         printf("}\n");
     }

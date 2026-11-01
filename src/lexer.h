@@ -4,39 +4,54 @@
 #include <stdbool.h>
 #include "log.h"
 
+#define TOKEN_LIST() \
+    X(TOKEN_NONE), \
+    X(TOKEN_NUM), \
+    X(TOKEN_STRING), \
+    X(TOKEN_PLUS), \
+    X(TOKEN_MINUS), \
+    X(TOKEN_STAR), \
+    X(TOKEN_SLASH), \
+    X(TOKEN_CARET), \
+    X(TOKEN_LEFT_PAREN), \
+    X(TOKEN_RIGHT_PAREN), \
+    X(TOKEN_COMMA), \
+    X(TOKEN_EQUAL), \
+    X(TOKEN_DOLLAR), \
+    X(TOKEN_ANS), \
+    X(TOKEN_IDENTIFIER), \
+    X(TOKEN_LET), \
+    X(TOKEN_EXIT), \
+    X(TOKEN_OR), \
+    X(TOKEN_AND), \
+    X(TOKEN_EQEQ), \
+    X(TOKEN_NOT), \
+    X(TOKEN_NOTEQ), \
+    X(TOKEN_LESS), \
+    X(TOKEN_LESSEQ), \
+    X(TOKEN_GREATER), \
+    X(TOKEN_GREATEREQ), \
+    X(TOKEN_TRUE), \
+    X(TOKEN_FALSE), \
+    X(TOKEN_END), \
+    X(TOKEN_ERROR), \
+    X(TOKEN_COUNT),
+
+#define X(t) t
+
 typedef enum {
-    TOKEN_NONE = 0,
-    TOKEN_NUM,
-    TOKEN_STRING,
-    TOKEN_PLUS,
-    TOKEN_MINUS,
-    TOKEN_STAR,
-    TOKEN_SLASH,
-    TOKEN_CARET,
-    TOKEN_LEFT_PAREN,
-    TOKEN_RIGHT_PAREN,
-    TOKEN_COMMA,
-    TOKEN_EQUAL,
-    TOKEN_DOLLAR,
-    TOKEN_ANS,
-    TOKEN_IDENTIFIER,
-    TOKEN_LET,
-    TOKEN_EXIT,
-    TOKEN_OR,
-    TOKEN_AND,
-    TOKEN_EQEQ,
-    TOKEN_NOT,
-    TOKEN_NOTEQ,
-    TOKEN_LESS,
-    TOKEN_LESSEQ,
-    TOKEN_GREATER,
-    TOKEN_GREATEREQ,
-    TOKEN_TRUE,
-    TOKEN_FALSE,
-    TOKEN_END,
-    TOKEN_ERROR,
-    TOKEN_COUNT,
+    TOKEN_LIST()
 } TokenType;
+
+#undef X
+
+#define X(t) #t
+
+static const char* const TOKEN_NAMES[] = {
+    TOKEN_LIST()
+};
+
+#undef X
 
 typedef struct {
     TokenType type;
