@@ -65,6 +65,7 @@ ParseRule rules[TOKEN_COUNT] = {
 
 Value exit_prog(Parser *parser)
 {
+    if (parser->skip) return VAL_NULL;
     (void)(parser);
     exit(parser->error);
 }
@@ -458,6 +459,8 @@ bool is_name(FILE *f, String name)
 
 bool export_variable(Parser *parser, FILE *f, String variable_name)
 {
+    if (parser->skip) return false;
+
     if (f == NULL) return false;
 
     // printf("var_len: %zu\n", variable_name.len);
@@ -489,6 +492,8 @@ bool export_variable(Parser *parser, FILE *f, String variable_name)
 
 bool import_variable(Parser *parser, FILE *f, String variable_name, Value *value)
 {
+    if (parser->skip) return false;
+
     if (f == NULL || feof(f)) return false;
 
     if (!is_name(f, variable_name)) return false;
@@ -745,6 +750,8 @@ Value boolean(Parser *parser)
 Value conditional(Parser *parser, Value cond)
 {
     Value result = VAL_NULL;
+    bool old_skip = parser->skip;
+    cond = cast_value_to_bool(cond);
 
     if (AS_BOOL(cond)) {
         result = expression(parser, PREC_NONE, TOKEN_NONE);
@@ -752,13 +759,13 @@ Value conditional(Parser *parser, Value cond)
             consume(parser);
             parser->skip = true;
             expression(parser, PREC_NONE, TOKEN_NONE);
-            parser->skip = false;
+            parser->skip = old_skip;
         }
     }
     else {
         parser->skip = true;
         expression(parser, PREC_NONE, TOKEN_NONE);
-        parser->skip = false;
+        parser->skip = old_skip;
         if (peek(parser).type == TOKEN_COLON) {
             consume(parser);
             result = expression(parser, PREC_NONE, TOKEN_NONE);
