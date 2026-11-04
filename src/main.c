@@ -12,7 +12,7 @@
 void print_value(Value value, bool prompt)
 {
     char *num = NULL;
-    if (prompt) printf(">> ");
+    if (prompt) printf("== ");
     switch (value.type) {
         case VALUE_NULL:
             printf("null\n");
