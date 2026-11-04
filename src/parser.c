@@ -57,7 +57,6 @@ ParseRule rules[TOKEN_COUNT] = {
     {grouping, NULL, PREC_NONE},        // TOKEN_LEFT_BRAC
     {NULL, NULL, PREC_NONE},            // TOKEN_RIGHT_BRAC
     {NULL, NULL, PREC_NONE},            // TOKEN_COLON
-    {NULL, NULL, PREC_NONE},            // TOKEN_SEMI_COLON
     {NULL, NULL, PREC_NONE},            // TOKEN_END
     {NULL, NULL, PREC_NONE},            // TOKEN_ERROR
     // TOKEN_COUNT
@@ -776,8 +775,6 @@ Value conditional(Parser *parser, Value cond)
             result = expression(parser, PREC_NONE, TOKEN_NONE);
         }
     }
-
-    expect(parser, TOKEN_SEMI_COLON, NULL);
 
     return result;
 }

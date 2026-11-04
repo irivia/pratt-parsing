@@ -231,12 +231,6 @@ static Token scan_token(Lexer *lexer)
                 token.len = 1;
                 consume(lexer);
                 break;
-            case ';':
-                token.type = TOKEN_SEMI_COLON;
-                token.start = &lexer->text[lexer->current];
-                token.len = 1;
-                consume(lexer);
-                break;
             case '$':
                 token.type = TOKEN_DOLLAR;
                 token.start = &lexer->text[lexer->current];
