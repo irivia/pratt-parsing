@@ -58,9 +58,10 @@ static void trim_left(Lexer *lexer)
     }
 }
 
-static Token match_identifier(Lexer *lexer, const char *text, int len, TokenType type)
+static Token match_identifier(Lexer *lexer, const char *text, TokenType type)
 {
     int start = lexer->current;
+    const int len = strlen(text);
 
     Token token = {0};
 
@@ -268,23 +269,23 @@ static Token scan_token(Lexer *lexer)
                 this_or_that(lexer, &token, '=', TOKEN_GREATER, TOKEN_GREATEREQ);
                 break;
             case 'a':
-                token = match_identifier(lexer, "ans", 3, TOKEN_ANS);
+                token = match_identifier(lexer, "ans", TOKEN_ANS);
                 break;
             case 'e':
-                token = match_identifier(lexer, "exit", 4, TOKEN_EXIT);
+                token = match_identifier(lexer, "exit", TOKEN_EXIT);
                 break;
             case 'l':
-                token = match_identifier(lexer, "let", 3, TOKEN_LET);
+                token = match_identifier(lexer, "let", TOKEN_LET);
                 break;
             case 't':
-                token = match_identifier(lexer, "true", 4, TOKEN_TRUE);
+                token = match_identifier(lexer, "true", TOKEN_TRUE);
                 break;
             case 'f':
-                token = match_identifier(lexer, "false", 5, TOKEN_FALSE);
+                token = match_identifier(lexer, "false", TOKEN_FALSE);
                 break;
             default:
                 if (is_alpha(c)) {
-                    token = match_identifier(lexer, "", 0, TOKEN_IDENTIFIER);
+                    token = match_identifier(lexer, "", TOKEN_IDENTIFIER);
                 }
                 else {
                     token.type = TOKEN_ERROR;
