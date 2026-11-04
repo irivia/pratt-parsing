@@ -67,6 +67,7 @@ static const Keyword keywords[] = {
     { "ans", TOKEN_ANS },
     { "exit", TOKEN_EXIT },
     { "let", TOKEN_LET },
+    { "type", TOKEN_TYPE },
     { "true", TOKEN_TRUE },
     { "false", TOKEN_FALSE },
 };

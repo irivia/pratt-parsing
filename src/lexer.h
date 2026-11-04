@@ -31,6 +31,7 @@
     X(TOKEN_LESSEQ), \
     X(TOKEN_GREATER), \
     X(TOKEN_GREATEREQ), \
+    X(TOKEN_TYPE), \
     X(TOKEN_TRUE), \
     X(TOKEN_FALSE), \
     X(TOKEN_LEFT_BRAC), \

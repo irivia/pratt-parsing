@@ -24,6 +24,7 @@ Value string(Parser *parser);
 Value boolean(Parser *parser);
 Value conditional(Parser *parser, Value cond);
 Value modify(Parser *parser);
+Value get_type(Parser *parser);
 
 ParseRule rules[TOKEN_COUNT] = {
     {NULL, NULL, PREC_NONE},            // TOKEN_NONE 
@@ -52,6 +53,7 @@ ParseRule rules[TOKEN_COUNT] = {
     {NULL, binary, PREC_COMP},          // TOKEN_LESSEQ
     {NULL, binary, PREC_COMP},          // TOKEN_GREATER
     {NULL, binary, PREC_COMP},          // TOKEN_GREATEREQ
+    {get_type, NULL, PREC_NONE},        // TOKEN_TYPE
     {boolean, NULL, PREC_NONE},         // TOKEN_TRUE
     {boolean, NULL, PREC_NONE},         // TOKEN_FALSE
     {grouping, NULL, PREC_NONE},        // TOKEN_LEFT_BRAC
@@ -492,13 +494,6 @@ Value identifier(Parser *parser)
         return modify(parser);
     }
 
-    if (expected_str(ident.start, "type", ident.len)) {
-        Value value = expression(parser, PREC_NONE, TOKEN_NONE);
-        char *type_name = value_type_to_str(value.type);
-        String type_str = (String) {.data = type_name, .len = strlen(type_name)};
-        return VAL_STR(type_str);
-    }
-
     for (size_t i = 0; i < array_len(funcs); i++) {
         if (expected_str(ident.start, funcs[i], ident.len)) {
             return math_func(parser, (MathFunc)i);
@@ -509,6 +504,15 @@ Value identifier(Parser *parser)
     parser->error = true;
 
     return VAL_BOOL(false);
+}
+
+Value get_type(Parser *parser)
+{
+    Value value = expression(parser, PREC_NONE, TOKEN_NONE);
+    char *type_name = value_type_to_str(value.type);
+    String type_str = (String) {.data = type_name, .len = strlen(type_name)};
+
+    return VAL_STR(type_str);
 }
 
 Value declare(Parser *parser)
