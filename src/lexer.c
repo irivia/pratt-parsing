@@ -58,22 +58,39 @@ static void trim_left(Lexer *lexer)
     }
 }
 
-static Token match_identifier(Lexer *lexer, const char *text, TokenType type)
-{
-    int start = lexer->current;
-    const int len = strlen(text);
+typedef struct {
+    const char *name;
+    TokenType type;
+} Keyword;
 
+static const Keyword keywords[] = {
+    { "ans", TOKEN_ANS },
+    { "exit", TOKEN_EXIT },
+    { "let", TOKEN_LET },
+    { "true", TOKEN_TRUE },
+    { "false", TOKEN_FALSE },
+};
+
+static const size_t keywords_count = sizeof(keywords) / sizeof(keywords[0]);
+
+static Token match_keyword(Lexer *lexer)
+{
+    const int start = lexer->current;
     Token token = {0};
+    token.type = TOKEN_IDENTIFIER;
 
     while (is_alnum(peek(lexer))) {
         consume(lexer);
     }
 
-    if (lexer->current - start == len && memcmp(&lexer->text[start], text, len) == 0) {
-        token.type = type;
-    }
-    else {
-        token.type = TOKEN_IDENTIFIER;
+    for (size_t i = 0; i < keywords_count; i++) {
+        const char *text = keywords[i].name;
+        const int len = strlen(text);
+        const TokenType type = keywords[i].type;
+        if (lexer->current - start == len && memcmp(&lexer->text[start], text, len) == 0) {
+            token.type = type;
+            break;
+        }
     }
 
     token.start = &lexer->text[start];
@@ -268,24 +285,9 @@ static Token scan_token(Lexer *lexer)
                 consume(lexer);
                 this_or_that(lexer, &token, '=', TOKEN_GREATER, TOKEN_GREATEREQ);
                 break;
-            case 'a':
-                token = match_identifier(lexer, "ans", TOKEN_ANS);
-                break;
-            case 'e':
-                token = match_identifier(lexer, "exit", TOKEN_EXIT);
-                break;
-            case 'l':
-                token = match_identifier(lexer, "let", TOKEN_LET);
-                break;
-            case 't':
-                token = match_identifier(lexer, "true", TOKEN_TRUE);
-                break;
-            case 'f':
-                token = match_identifier(lexer, "false", TOKEN_FALSE);
-                break;
             default:
                 if (is_alpha(c)) {
-                    token = match_identifier(lexer, "", TOKEN_IDENTIFIER);
+                    token = match_keyword(lexer);
                 }
                 else {
                     token.type = TOKEN_ERROR;
