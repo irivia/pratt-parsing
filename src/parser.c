@@ -457,69 +457,6 @@ bool is_name(FILE *f, String name)
     return true;
 }
 
-bool export_variable(Parser *parser, FILE *f, String variable_name)
-{
-    if (parser->skip) return false;
-
-    if (f == NULL) return false;
-
-    // printf("var_len: %zu\n", variable_name.len);
-    if (!map_has(&parser->map, variable_name)) return false;
-
-    Value value = map_get(&parser->map, variable_name); 
-
-    if (fwrite(variable_name.data, sizeof(char), variable_name.len, f) != variable_name.len) return false;
-    if (fputc('\0', f) == EOF) return false;
-
-    if (fwrite(&value.type, sizeof(ValueType), 1, f) != 1) return false;
-    switch (value.type) {
-        case VALUE_NUM:
-            if (fwrite(&AS_NUM(value), sizeof(AS_NUM(value)), 1, f) != 1) return false;
-            break;
-        case VALUE_BOOL:
-            if (fwrite(&AS_BOOL(value), sizeof(AS_BOOL(value)), 1, f) != 1) return false;
-            break;
-        case VALUE_STR:
-            if (fwrite(&AS_STR(value).len, sizeof(AS_STR(value).len), 1, f) != 1) return false;
-            if (fwrite(AS_STR(value).data, sizeof(char), AS_STR(value).len, f) != AS_STR(value).len) return false;
-            break;
-        default:
-            return false;
-    }
-
-    return true;
-}
-
-bool import_variable(Parser *parser, FILE *f, String variable_name, Value *value)
-{
-    if (parser->skip) return false;
-
-    if (f == NULL || feof(f)) return false;
-
-    if (!is_name(f, variable_name)) return false;
-
-    if (fread(&value->type, sizeof(ValueType), 1, f) != 1) return false;
-    switch (value->type) {
-        case VALUE_NUM:
-            if (fread(&AS_NUM(*value), sizeof(AS_NUM(*value)), 1, f) != 1) return false;
-            break;
-        case VALUE_BOOL:
-            if (fread(&AS_BOOL(*value), sizeof(AS_BOOL(*value)), 1, f) != 1) return false;
-            break;
-        case VALUE_STR:
-            if (fread(&AS_STR(*value).len, sizeof(AS_STR(*value).len), 1, f) != 1) return false;
-            char *buffer = arena_alloc(&parser->arena, sizeof(char) * (AS_STR(*value).len + 1));
-            if (fread(buffer, sizeof(char), AS_STR(*value).len, f) != AS_STR(*value).len) return false;
-            buffer[AS_STR(*value).len] = '\0';
-            AS_STR(*value).data = buffer;
-            break;
-        default:
-            return false;
-    }
-
-    return true;
-}
-
 Value identifier(Parser *parser)
 {
     static const char* funcs[MATHFUNC_COUNT] = {
@@ -555,71 +492,7 @@ Value identifier(Parser *parser)
         return modify(parser);
     }
 
-    if (expected_str(ident.start, "export", ident.len)) {
-        if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_BOOL(false);
-
-        if (!expect(parser, TOKEN_DOLLAR, NULL)) {
-            log_info(&parser->logging, "Error: First argument should be a variable starting with '$'.");
-            return VAL_BOOL(false);
-        }
-
-        Token ident;
-        if (!expect(parser, TOKEN_IDENTIFIER, &ident)) {
-            log_info(&parser->logging, "Error: Invalid identifier.");
-            return VAL_BOOL(false);
-        }
-
-        String var_name = (String){.data = (char*)ident.start, .len = ident.len};
-
-        if (!map_has(&parser->map, var_name)) {
-            log_info(&parser->logging, "Error: variable '%.*s' doesn't exist.", (int)ident.len, ident.start);
-            return VAL_BOOL(false);
-        }
-
-        if (parser->error) {
-            log_info(&parser->logging, "Error: Couldn't export variable because of parsing error.");
-            return VAL_BOOL(false);
-        }
-
-        if (!expect(parser, TOKEN_COMMA, NULL)) return VAL_BOOL(false);
-        String var_path = AS_STR(grouping(parser));
-        FILE *file = fopen(var_path.data, "wb");
-        if (file == NULL) {
-            log_info(&parser->logging, "Error: Couldn't write to file '%s'", var_path.data);
-            parser->error = true;
-            return VAL_BOOL(false);
-        }
-        if (!export_variable(parser, file, var_name)) {
-            fclose(file);
-            log_info(&parser->logging, "Error: Failed to export variable '%s'", var_name.data);
-            parser->error = true;
-            return VAL_BOOL(false);
-        }
-        fclose(file);
-        return VAL_BOOL(true);
-    }
-    else if (expected_str(ident.start, "import", ident.len)) {
-        if (!expect(parser, TOKEN_LEFT_PAREN, NULL)) return VAL_BOOL(false);
-        String var_name = AS_STR(expression(parser, PREC_NONE, TOKEN_STRING));
-        if (!expect(parser, TOKEN_COMMA, NULL)) return VAL_BOOL(false);
-        String var_path = AS_STR(grouping(parser));
-        FILE *file = fopen(var_path.data, "rb");
-        if (file == NULL) {
-            log_info(&parser->logging, "Couldn't read from file '%s'", var_path.data);
-            parser->error = true;
-            return VAL_BOOL(false);
-        }
-        Value var = {0};
-        if (!import_variable(parser, file, var_name, &var)) {
-            fclose(file);
-            log_info(&parser->logging, "Failed to import variable '%s'", var_name.data);
-            parser->error = true;
-            return VAL_BOOL(false);
-        }
-        fclose(file);
-        return var;
-    }
-    else if (expected_str(ident.start, "type", ident.len)) {
+    if (expected_str(ident.start, "type", ident.len)) {
         Value value = expression(parser, PREC_NONE, TOKEN_NONE);
         char *type_name = value_type_to_str(value.type);
         String type_str = (String) {.data = type_name, .len = strlen(type_name)};
