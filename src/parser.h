@@ -35,11 +35,11 @@ typedef Value (*ParseFn)(Parser *parser);
 typedef struct {
     ParseFn prefix;
     ParseFn infix; 
-    int lbp;
+    float lbp;
 } ParseRule;
 
 Parser parser_create();
 void parser_destroy(Parser *parser);
 void parser_reset(Parser *parser, TokenList *list);
-Value expression(Parser *parser, precedence rbp, TokenType expected_first_token);
+Value expression(Parser *parser, float rbp, TokenType expected_first_token);
 Value parse_expr(Parser *parser);

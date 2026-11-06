@@ -234,7 +234,7 @@ Value do_operation(Parser *parser, Value left, Value right, Token oper)
     return result;
 }
 
-Value expression(Parser *parser, precedence rbp, TokenType expected_first_token)
+Value expression(Parser *parser, float rbp, TokenType expected_first_token)
 {
     if (parser->error) return VAL_NULL;
     Token token = consume(parser);
@@ -253,7 +253,7 @@ Value expression(Parser *parser, precedence rbp, TokenType expected_first_token)
 
     Value left = left_rule->prefix(parser);
 
-    while ((int)rbp < get_rule(peek(parser))->lbp) {
+    while (rbp < get_rule(peek(parser))->lbp) {
         if (parser->error) return VAL_NULL;
         token = consume(parser);
         ParseRule *right_rule = get_rule(token);
@@ -325,7 +325,9 @@ Value unary(Parser *parser)
 
 Value binary(Parser *parser)
 {
-    Value result = expression(parser, get_rule(prev(parser))->lbp, TOKEN_NONE);
+    Token previous = prev(parser);
+    float rbp = get_rule(previous)->lbp;
+    Value result = expression(parser, rbp - 0.01f, TOKEN_NONE);
 
     return result;
 }
